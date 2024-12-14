@@ -1,0 +1,3 @@
+# config.py
+MODEL_HEIGHT = 1.8
+VOXEL_RESOLUTION = 1024
