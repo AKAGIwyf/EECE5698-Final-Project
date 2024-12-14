@@ -4,15 +4,15 @@ import torch
 class DynamicPointCloudAutoencoder(nn.Module):
     def __init__(self, input_dim=3, hidden_dim=64, latent_dim=32, sequence_length=5):
         """
-        动态点云自编码器
-        :param input_dim: 输入点的维度 (默认为 3)
-        :param hidden_dim: 隐藏层特征维度
-        :param latent_dim: 潜在特征维度
-        :param sequence_length: 动态点云的帧数
+        Dynamic Point Cloud Autoencoder
+        :param input_dim: Dimension of input points (default: 3)
+        :param hidden_dim: Dimension of hidden layer features
+        :param latent_dim: Dimension of latent features
+        :param sequence_length: Number of frames in the dynamic point cloud
         """
         super(DynamicPointCloudAutoencoder, self).__init__()
 
-        # 编码器
+        # Encoder
         self.encoder = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
             nn.LayerNorm(hidden_dim),
@@ -23,7 +23,7 @@ class DynamicPointCloudAutoencoder(nn.Module):
             nn.Linear(hidden_dim * 2, latent_dim)
         )
 
-        # LSTM 用于时间序列建模
+        # LSTM for temporal modeling
         self.temporal_model = nn.LSTM(
             input_size=latent_dim,
             hidden_size=latent_dim,
@@ -31,7 +31,7 @@ class DynamicPointCloudAutoencoder(nn.Module):
             batch_first=True
         )
 
-        # 解码器
+        # Decoder
         self.decoder = nn.Sequential(
             nn.Linear(latent_dim, hidden_dim * 2),
             nn.LayerNorm(hidden_dim * 2),
@@ -45,32 +45,31 @@ class DynamicPointCloudAutoencoder(nn.Module):
     def forward(self, x):
         batch_size, sequence_length, num_points, input_dim = x.shape
 
-        # 展平每帧点云以输入编码器
+        # Flatten each frame of the point cloud for input to the encoder
         x = x.view(-1, input_dim)  # (batch_size * sequence_length * num_points, input_dim)
 
-        # 编码每帧点云
+        # Encode each frame of the point cloud
         latent = self.encoder(x)  # (batch_size * sequence_length * num_points, latent_dim)
 
-        # 恢复每帧点云的形状
+        # Reshape latent features back to frame shape
         latent = latent.view(batch_size, sequence_length, num_points,
                              -1)  # (batch_size, sequence_length, num_points, latent_dim)
 
-        # 聚合点云特征用于时间序列建模
+        # Aggregate point cloud features for temporal modeling
         latent = torch.mean(latent, dim=2)  # (batch_size, sequence_length, latent_dim)
 
-        # 使用 LSTM 进行时间序列建模
+        # Perform temporal modeling with LSTM
         latent, _ = self.temporal_model(latent)  # (batch_size, sequence_length, latent_dim)
 
-        # 恢复点云特征
+        # Restore point cloud features
         latent = latent.unsqueeze(2).repeat(1, 1, num_points,
                                             1)  # (batch_size, sequence_length, num_points, latent_dim)
-        latent = latent.view(-1, latent.size(-1))  # 展平为 (batch_size * sequence_length * num_points, latent_dim)
+        latent = latent.view(-1, latent.size(-1))  # Flatten to (batch_size * sequence_length * num_points, latent_dim)
 
-        # 解码重构每帧点云
+        # Decode reconstructed point clouds for each frame
         reconstructed = self.decoder(latent)  # (batch_size * sequence_length * num_points, input_dim)
 
-        # 恢复动态点云的形状
+        # Reshape back to dynamic point cloud shape
         reconstructed = reconstructed.view(batch_size, sequence_length, num_points, input_dim)
 
         return latent, reconstructed
-

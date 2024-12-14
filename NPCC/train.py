@@ -3,21 +3,19 @@ import torch
 
 def train(dataloader, model, optimizer, num_epochs=10, device='cuda'):
     model = model.to(device)
-    best_loss = float("inf")  # 用于保存最优模型
+    best_loss = float("inf")  # To store the best model
     for epoch in range(num_epochs):
         model.train()
         total_loss = 0
 
         for batch_idx, sequence_data in enumerate(dataloader):
-            sequence_data = sequence_data.to(device)  # (B, T, N, C)
+            sequence_data = sequence_data.to(device)  # Shape: (B, T, N, C)
 
-            print(f"Batch {batch_idx + 1}: Input to model shape: {sequence_data.shape}")
-
-            # 前向传播
+            # Forward pass
             optimizer.zero_grad()
             latent, reconstructed = model(sequence_data)
 
-            # 计算损失
+            # Compute loss
             loss = torch.nn.functional.mse_loss(reconstructed, sequence_data)
             loss.backward()
             optimizer.step()
@@ -27,9 +25,8 @@ def train(dataloader, model, optimizer, num_epochs=10, device='cuda'):
         avg_loss = total_loss / len(dataloader)
         print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {total_loss / len(dataloader):.4f}")
 
-        # 保存最佳模型
+        # Save the best model
         if avg_loss < best_loss:
             best_loss = avg_loss
-            print("保存最优模型...")
-            torch.save(model.state_dict(), "./model/saved_model.pth")  # 保存模型
-
+            print("Saving the best model...")
+            torch.save(model.state_dict(), "./model/saved_model.pth")  # Save the model

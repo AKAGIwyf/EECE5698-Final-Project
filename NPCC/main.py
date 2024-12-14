@@ -6,8 +6,8 @@ from train import train
 
 
 def main():
-    # 参数设置
-    data_dir = "./dataset/exercise_vox11_organized"  # 动态点云数据集路径
+    # Parameter settings
+    data_dir = "./dataset/exercise_vox11_organized"  # Path to the dynamic point cloud dataset
     batch_size = 4
     sequence_length = 10
     model_height = 1.8
@@ -15,31 +15,31 @@ def main():
     num_epochs = 20
     learning_rate = 1e-2
 
-    # 确定设备
+    # Determine the device to use
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"使用设备: {device}")
+    print(f"Using device: {device}")
 
-    # 加载动态点云数据集
-    print("加载动态点云数据集...")
+    # Load the dynamic point cloud dataset
+    print("Loading dynamic point cloud dataset...")
     dataset = DynamicPointCloudDataset(
         data_dir=data_dir,
         model_height=model_height,
         voxel_resolution=voxel_resolution,
         sequence_length=sequence_length
     )
-    print(f"数据集大小: {len(dataset)}")  # 打印数据集大小
+    print(f"Dataset size: {len(dataset)}")  # Print dataset size
     if len(dataset) == 0:
-        raise ValueError("数据集为空，请检查数据路径和文件内容。")
+        raise ValueError("The dataset is empty. Please check the data path and file contents.")
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    print(f"数据集大小: {len(dataset)}")
+    print(f"Dataset size: {len(dataset)}")
 
-    # 初始化模型
-    print("初始化模型...")
+    # Initialize the model
+    print("Initializing model...")
     model = DynamicPointCloudAutoencoder(sequence_length=sequence_length)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-    # 训练模型
-    print("开始训练...")
+    # Train the model
+    print("Starting training...")
     train(dataloader, model, optimizer, num_epochs=num_epochs, device=device)
 
 
