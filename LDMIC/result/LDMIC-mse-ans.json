@@ -1,0 +1,51 @@
+{
+  "name": "LDMIC-mse",
+  "description": "Inference (ans)",
+  "results": {
+    "left-psnr-float": [
+      36.92764663696289
+    ],
+    "left-ms-ssim-float": [
+      NaN
+    ],
+    "right-psnr-float": [
+      36.893428802490234
+    ],
+    "right-ms-ssim-float": [
+      NaN
+    ],
+    "psnr-float": [
+      36.91053771972656
+    ],
+    "ms-ssim-float": [
+      NaN
+    ],
+    "left_bpp": [
+      0.2690219581127167
+    ],
+    "right_bpp": [
+      0.26264575123786926
+    ],
+    "bpp": [
+      0.2658338248729706
+    ],
+    "enc_left_time": [
+      10.67626667022705
+    ],
+    "enc_right_time": [
+      10.640912055969238
+    ],
+    "enc_time": [
+      10.843745231628418
+    ],
+    "enc_average_time": [
+      10.658590316772461
+    ],
+    "dec_time": [
+      73.62223052978516
+    ],
+    "dec_average_time": [
+      36.81111526489258
+    ]
+  }
+}
